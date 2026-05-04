@@ -48,6 +48,7 @@ const actionSteps = [
 ];
 
 const meetingDate = new Date('2026-06-02T00:00:00-04:00');
+const heroBackgroundVideoId = 'tQzoSqM1x-o';
 
 type MapPointer = {
     label: string;
@@ -59,7 +60,7 @@ type MapPointer = {
     anchorY: number;
 };
 
-const mapPointers: MapPointer[] = [
+const desktopMapPointers: MapPointer[] = [
   {
     "label": "Fessenden Elementary",
     "labelX": 2.69,
@@ -99,6 +100,45 @@ const mapPointers: MapPointer[] = [
 
 ];
 
+const mobileMapPointers: MapPointer[] = [
+  {
+    "label": "Fessenden Elementary",
+    "labelX": 19.21,
+    "labelY": 3.19,
+    "topX": 18.9,
+    "topY": 3.96,
+    "anchorX": 16.46,
+    "anchorY": 28.83
+  },
+  {
+    "label": "Homes",
+    "labelX": 68.9,
+    "labelY": 28.32,
+    "topX": 67.38,
+    "topY": 28.83,
+    "anchorX": 21.65,
+    "anchorY": 46.78
+  },
+  {
+    "label": "Church",
+    "labelX": 40.24,
+    "labelY": 26.27,
+    "topX": 39.63,
+    "topY": 28.57,
+    "anchorX": 24.09,
+    "anchorY": 35.24
+  },
+  {
+    "label": "Local businesses",
+    "labelX": 42.99,
+    "labelY": 88.57,
+    "topX": 44.51,
+    "topY": 91.91,
+    "anchorX": 79.57,
+    "anchorY": 47.55
+  }
+];
+
 function formatCountdown(targetDate: Date, now: Date): string {
     const remainingMs = Math.max(targetDate.getTime() - now.getTime(), 0);
     const totalSeconds = Math.floor(remainingMs / 1000);
@@ -116,13 +156,16 @@ function formatCountdown(targetDate: Date, now: Date): string {
 
 export default function Welcome() {
     const [currentTime, setCurrentTime] = useState<Date | null>(null);
+    const [isMobileView, setIsMobileView] = useState(false);
     const [showMapPointers, setShowMapPointers] = useState(true);
     const [editMapPointers, setEditMapPointers] = useState(false);
+    const [desktopPointerState, setDesktopPointerState] =
+        useState<MapPointer[]>(desktopMapPointers);
+    const [mobilePointerState, setMobilePointerState] =
+        useState<MapPointer[]>(mobileMapPointers);
     const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>(
         'idle',
     );
-    const [mapPointerState, setMapPointerState] =
-        useState<MapPointer[]>(mapPointers);
     const mapCanvasRef = useRef<HTMLDivElement | null>(null);
     const dragStateRef = useRef<{
         index: number;
@@ -140,6 +183,24 @@ export default function Welcome() {
             window.clearInterval(timer);
         };
     }, []);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 767px)');
+        const syncMobileView = (): void => {
+            setIsMobileView(mediaQuery.matches);
+        };
+
+        syncMobileView();
+        mediaQuery.addEventListener('change', syncMobileView);
+
+        return () => {
+            mediaQuery.removeEventListener('change', syncMobileView);
+        };
+    }, []);
+
+    const mapPointerState = isMobileView
+        ? mobilePointerState
+        : desktopPointerState;
 
     const meetingCountdown = useMemo(() => {
         if (currentTime === null) {
@@ -186,7 +247,11 @@ export default function Welcome() {
             const clampedX = Math.max(-60, Math.min(160, xPercent));
             const clampedY = Math.max(-60, Math.min(160, yPercent));
 
-            setMapPointerState((currentPointers) =>
+            const setPointerState = isMobileView
+                ? setMobilePointerState
+                : setDesktopPointerState;
+
+            setPointerState((currentPointers) =>
                 currentPointers.map((pointer, pointerIndex) => {
                     if (pointerIndex !== dragState.index) {
                         return pointer;
@@ -227,13 +292,24 @@ export default function Welcome() {
             window.removeEventListener('pointermove', handlePointerMove);
             window.removeEventListener('pointerup', handlePointerUp);
         };
-    }, [editMapPointers]);
+    }, [editMapPointers, isMobileView]);
 
     return (
         <>
             <Head title="Protect Our Community" />
             <main className="min-h-screen bg-[#f7f4ed] text-[#17211b]">
                 <section className="relative isolate overflow-hidden bg-[#17211b] text-white">
+                    <div className="pointer-events-none absolute inset-0 -z-20 hidden overflow-hidden md:block">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${heroBackgroundVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${heroBackgroundVideoId}&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1`}
+                            title="Desktop background video"
+                            className="absolute top-1/2 left-1/2 h-[130%] w-[130%] -translate-x-1/2 -translate-y-1/2 scale-110 blur-sm"
+                            allow="autoplay; encrypted-media; picture-in-picture"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            tabIndex={-1}
+                        />
+                        <div className="absolute inset-0 bg-[#17211b]/55" />
+                    </div>
                     <div className="absolute inset-0 -z-10 opacity-35">
                         <div className="absolute top-10 left-[8%] h-56 w-56 rounded-full bg-[#7fb069] blur-3xl" />
                         <div className="absolute right-[10%] bottom-0 h-72 w-72 rounded-full bg-[#d96c3b] blur-3xl" />
@@ -251,9 +327,6 @@ export default function Welcome() {
                             Ocala Waste Watch
                         </a>
                         <nav className="hidden items-center gap-6 text-sm font-medium text-white/80 md:flex">
-                            <a href="#proposal" className="hover:text-white">
-                                Proposal
-                            </a>
                             <a href="#concerns" className="hover:text-white">
                                 Concerns
                             </a>
@@ -267,15 +340,28 @@ export default function Welcome() {
                         id="top"
                         className="mx-auto grid max-w-7xl items-center gap-12 px-6 pt-12 pb-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:pt-20 lg:pb-28"
                     >
-                        <div>
+                        <div className="rounded-lg bg-black/18 p-4 backdrop-blur-[1px] sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
                             <div className="mb-7 inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/85 backdrop-blur">
                                 <Megaphone className="size-4 text-[#f4b860]" />
                                 Meeting countdown: {meetingCountdown}
                             </div>
-                            <h1 className="max-w-4xl text-5xl leading-[0.95] font-black tracking-tight text-balance sm:text-6xl lg:text-7xl">
-                                Protect our schools, Churches, homes, farms, and local
-                                businesses.
-                            </h1>
+                            <div className="relative max-w-4xl overflow-hidden rounded-md">
+                                <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden md:hidden">
+                                    <iframe
+                                        src={`https://www.youtube.com/embed/${heroBackgroundVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${heroBackgroundVideoId}&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1`}
+                                        title="Headline background video"
+                                        className="absolute top-1/2 left-1/2 h-[170%] w-[170%] -translate-x-1/2 -translate-y-1/2 scale-110 blur-sm"
+                                        allow="autoplay; encrypted-media; picture-in-picture"
+                                        referrerPolicy="strict-origin-when-cross-origin"
+                                        tabIndex={-1}
+                                    />
+                                    <div className="absolute inset-0 bg-[#17211b]/70" />
+                                </div>
+                                <h1 className="relative px-2 py-2 text-5xl leading-[0.95] font-black tracking-tight text-balance sm:text-6xl lg:text-7xl">
+                                    Protect our schools, Churches, homes, farms, and local
+                                    businesses.
+                                </h1>
+                            </div>
                             <p className="mt-7 max-w-2xl text-lg leading-8 text-white/78">
                                 A food waste depackaging and fertilizer
                                 operation is being proposed near places where
@@ -312,7 +398,7 @@ export default function Welcome() {
                                     <img
                                         src="/images/proposal-map.png"
                                         alt="Map of the proposed waste facility and nearby community landmarks"
-                                        className="absolute inset-0 h-full w-full object-cover"
+                                        className="absolute inset-0 h-full w-full bg-[#d9d5c9] object-contain"
                                     />
                                     <div className="absolute inset-0 bg-black/12" />
                                 </div>
@@ -447,7 +533,9 @@ export default function Welcome() {
                                     <div className="flex items-center justify-between gap-2">
                                         <p className="text-white/90">
                                             Drag labels, orange dots, and gold
-                                            dots. Then copy this config:
+                                            dots. Then copy this{' '}
+                                            {isMobileView ? 'mobile' : 'desktop'}{' '}
+                                            config:
                                         </p>
                                         <button
                                             type="button"
@@ -468,55 +556,6 @@ export default function Welcome() {
                                     />
                                 </div>
                             )}
-                        </div>
-                    </div>
-                </section>
-
-                <section
-                    id="proposal"
-                    className="border-b border-[#17211b]/10 bg-white px-6 py-18 lg:px-8"
-                >
-                    <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-                        <div>
-                            <p className="text-sm font-black tracking-wide text-[#d96c3b] uppercase">
-                                What is being proposed
-                            </p>
-                            <h2 className="mt-3 text-4xl leading-tight font-black text-balance sm:text-5xl">
-                                An industrial food waste operation needs a
-                                special use permit.
-                            </h2>
-                        </div>
-                        <div className="grid gap-4 sm:grid-cols-3">
-                            <div className="rounded-lg border border-[#17211b]/10 bg-[#f7f4ed] p-5">
-                                <Factory className="mb-5 size-7 text-[#d96c3b]" />
-                                <h3 className="text-lg font-black">
-                                    Food waste depackaging
-                                </h3>
-                                <p className="mt-3 text-sm leading-6 text-[#4a554d]">
-                                    Separating food waste from packaging before
-                                    further processing.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-[#17211b]/10 bg-[#f7f4ed] p-5">
-                                <Sprout className="mb-5 size-7 text-[#5d8f45]" />
-                                <h3 className="text-lg font-black">
-                                    Fertilizer production
-                                </h3>
-                                <p className="mt-3 text-sm leading-6 text-[#4a554d]">
-                                    Converting waste streams into material that
-                                    may be stored, transported, or applied.
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-[#17211b]/10 bg-[#f7f4ed] p-5">
-                                <CalendarDays className="mb-5 size-7 text-[#4f7cac]" />
-                                <h3 className="text-lg font-black">
-                                    M-2 zoning permit
-                                </h3>
-                                <p className="mt-3 text-sm leading-6 text-[#4a554d]">
-                                    The decision point is the special use permit,
-                                    not whether neighbors care after it opens.
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -565,10 +604,7 @@ export default function Welcome() {
                                 permit.
                             </h2>
                             <p className="mt-6 text-lg leading-8 text-white/75">
-                                The exact meeting details should be confirmed
-                                before publication. Until then, keep the call to
-                                action visible and make it clear that neighbors
-                                need to prepare now.
+                                MEETING DETAILS
                             </p>
                         </div>
                         <div className="rounded-lg border border-white/15 bg-white/10 p-6 backdrop-blur">
