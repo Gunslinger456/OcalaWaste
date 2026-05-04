@@ -1,3 +1,4 @@
+
 import { Head } from '@inertiajs/react';
 import {
     AlertTriangle,
@@ -14,6 +15,8 @@ import {
     Sprout,
     Truck,
 } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
 
 const concerns = [
     {
@@ -44,7 +47,188 @@ const actionSteps = [
     'Share this page with neighbors, parents, farm owners, business owners, and anyone who will live with the decision.',
 ];
 
+const meetingDate = new Date('2026-06-02T00:00:00-04:00');
+
+type MapPointer = {
+    label: string;
+    labelX: number;
+    labelY: number;
+    topX: number;
+    topY: number;
+    anchorX: number;
+    anchorY: number;
+};
+
+const mapPointers: MapPointer[] = [
+  {
+    "label": "Fessenden Elementary",
+    "labelX": 2.69,
+    "labelY": -8.66,
+    "topX": 2.11,
+    "topY": -0.2,
+    "anchorX": 16.93,
+    "anchorY": 16.98
+  },
+  {
+    "label": "Homes",
+    "labelX": -8.62,
+    "labelY": 19.49,
+    "topX": -8.42,
+    "topY": 29.23,
+    "anchorX": 20.44,
+    "anchorY": 48.72
+  },
+  {
+    "label": "Church",
+    "labelX": 71.73,
+    "labelY": 18.46,
+    "topX": 65.68,
+    "topY": 22.56,
+    "anchorX": 24.92,
+    "anchorY": 26.92
+  },
+  {
+    "label": "Local businesses",
+    "labelX": 42.87,
+    "labelY": 85.9,
+    "topX": 43.45,
+    "topY": 72.56,
+    "anchorX": 81.09,
+    "anchorY": 42.56
+  }
+
+];
+
+function formatCountdown(targetDate: Date, now: Date): string {
+    const remainingMs = Math.max(targetDate.getTime() - now.getTime(), 0);
+    const totalSeconds = Math.floor(remainingMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (totalSeconds === 0) {
+        return 'Meeting day is here';
+    }
+
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
 export default function Welcome() {
+    const [currentTime, setCurrentTime] = useState<Date | null>(null);
+    const [showMapPointers, setShowMapPointers] = useState(true);
+    const [editMapPointers, setEditMapPointers] = useState(false);
+    const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>(
+        'idle',
+    );
+    const [mapPointerState, setMapPointerState] =
+        useState<MapPointer[]>(mapPointers);
+    const mapCanvasRef = useRef<HTMLDivElement | null>(null);
+    const dragStateRef = useRef<{
+        index: number;
+        type: 'label' | 'anchor' | 'top';
+    } | null>(null);
+
+    useEffect(() => {
+        setCurrentTime(new Date());
+
+        const timer = window.setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+
+        return () => {
+            window.clearInterval(timer);
+        };
+    }, []);
+
+    const meetingCountdown = useMemo(() => {
+        if (currentTime === null) {
+            return 'Loading countdown...';
+        }
+
+        return formatCountdown(meetingDate, currentTime);
+    }, [currentTime]);
+
+    const mapPointerConfig = useMemo(() => {
+        return JSON.stringify(mapPointerState, null, 2);
+    }, [mapPointerState]);
+
+    const copyMapPointerConfig = async (): Promise<void> => {
+        try {
+            await navigator.clipboard.writeText(mapPointerConfig);
+            setCopyStatus('copied');
+        } catch {
+            setCopyStatus('error');
+        }
+
+        window.setTimeout(() => {
+            setCopyStatus('idle');
+        }, 1800);
+    };
+
+    useEffect(() => {
+        if (!editMapPointers) {
+            dragStateRef.current = null;
+            return;
+        }
+
+        const handlePointerMove = (event: PointerEvent): void => {
+            const dragState = dragStateRef.current;
+            const mapCanvas = mapCanvasRef.current;
+
+            if (dragState === null || mapCanvas === null) {
+                return;
+            }
+
+            const rect = mapCanvas.getBoundingClientRect();
+            const xPercent = ((event.clientX - rect.left) / rect.width) * 100;
+            const yPercent = ((event.clientY - rect.top) / rect.height) * 100;
+            const clampedX = Math.max(-60, Math.min(160, xPercent));
+            const clampedY = Math.max(-60, Math.min(160, yPercent));
+
+            setMapPointerState((currentPointers) =>
+                currentPointers.map((pointer, pointerIndex) => {
+                    if (pointerIndex !== dragState.index) {
+                        return pointer;
+                    }
+
+                    if (dragState.type === 'label') {
+                        return {
+                            ...pointer,
+                            labelX: Number(clampedX.toFixed(2)),
+                            labelY: Number(clampedY.toFixed(2)),
+                        };
+                    }
+                    if (dragState.type === 'top') {
+                        return {
+                            ...pointer,
+                            topX: Number(clampedX.toFixed(2)),
+                            topY: Number(clampedY.toFixed(2)),
+                        };
+                    }
+
+                    return {
+                        ...pointer,
+                        anchorX: Number(clampedX.toFixed(2)),
+                        anchorY: Number(clampedY.toFixed(2)),
+                    };
+                }),
+            );
+        };
+
+        const handlePointerUp = (): void => {
+            dragStateRef.current = null;
+        };
+
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+
+        return () => {
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+        };
+    }, [editMapPointers]);
+
     return (
         <>
             <Head title="Protect Our Community" />
@@ -86,10 +270,10 @@ export default function Welcome() {
                         <div>
                             <div className="mb-7 inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/85 backdrop-blur">
                                 <Megaphone className="size-4 text-[#f4b860]" />
-                                Special use permit hearing expected in about one month
+                                Meeting countdown: {meetingCountdown}
                             </div>
                             <h1 className="max-w-4xl text-5xl leading-[0.95] font-black tracking-tight text-balance sm:text-6xl lg:text-7xl">
-                                Protect our schools, homes, farms, and local
+                                Protect our schools, Churches, homes, farms, and local
                                 businesses.
                             </h1>
                             <p className="mt-7 max-w-2xl text-lg leading-8 text-white/78">
@@ -118,34 +302,172 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        <div className="relative min-h-[430px] overflow-hidden rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/30 backdrop-blur">
-                            <div className="absolute inset-5 rounded-md border border-white/10 bg-[#e9e1cf]/95" />
-                            <div className="relative h-full min-h-[390px] rounded-md bg-[linear-gradient(90deg,rgba(23,33,27,0.12)_1px,transparent_1px),linear-gradient(rgba(23,33,27,0.12)_1px,transparent_1px)] bg-[size:38px_38px] p-6 text-[#17211b]">
-                                <div className="absolute top-8 left-8 flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-bold shadow-lg">
-                                    <School className="size-4 text-[#4f7cac]" />
-                                    Schools
+                        <div className="relative overflow-visible rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/30 backdrop-blur">
+                            <div className="pointer-events-none absolute inset-5 rounded-md border border-white/10 bg-[#e9e1cf]/95" />
+                            <div
+                                ref={mapCanvasRef}
+                                className="relative min-h-[390px] overflow-visible rounded-md text-[#17211b]"
+                            >
+                                <div className="absolute inset-0 overflow-hidden rounded-md">
+                                    <img
+                                        src="/images/proposal-map.png"
+                                        alt="Map of the proposed waste facility and nearby community landmarks"
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/12" />
                                 </div>
-                                <div className="absolute right-8 bottom-24 flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-bold shadow-lg">
-                                    <Sprout className="size-4 text-[#5d8f45]" />
-                                    Farms
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowMapPointers(
+                                            (currentValue) => !currentValue,
+                                        )
+                                    }
+                                    className="absolute top-3 right-3 z-30 rounded-md border border-white/70 bg-white/90 px-3 py-2 text-xs font-black tracking-wide text-[#17211b] uppercase shadow-md transition hover:bg-white"
+                                >
+                                    {showMapPointers
+                                        ? 'Hide labels'
+                                        : 'Show labels'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setEditMapPointers(
+                                            (currentValue) => !currentValue,
+                                        )
+                                    }
+                                    className="absolute top-3 right-32 z-30 rounded-md border border-white/70 bg-white/90 px-3 py-2 text-xs font-black tracking-wide text-[#17211b] uppercase shadow-md transition hover:bg-white"
+                                >
+                                    {editMapPointers ? 'Stop editing' : 'Edit map'}
+                                </button>
+                                <div className="absolute top-[47%] left-[49%] rounded-md bg-[#17211b] px-3 py-2 text-xs font-black tracking-wide text-white -translate-x-1/2 -translate-y-1/2">
+                                    Proposed parcel
                                 </div>
-                                <div className="absolute top-28 right-10 flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-bold shadow-lg">
-                                    <MapPin className="size-4 text-[#d96c3b]" />
-                                    Homes
-                                </div>
-                                <div className="absolute bottom-9 left-10 flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-bold shadow-lg">
-                                    <Leaf className="size-4 text-[#5d8f45]" />
-                                    Local businesses
-                                </div>
-                                <div className="absolute top-1/2 left-1/2 flex size-36 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-lg bg-[#17211b] p-5 text-center text-white shadow-2xl ring-8 ring-[#d96c3b]/25">
-                                    <Factory className="mb-3 size-9 text-[#f4b860]" />
-                                    <span className="text-sm leading-tight font-black">
-                                        Proposed waste facility
-                                    </span>
-                                </div>
-                                <div className="absolute top-[47%] right-[18%] h-1 w-28 rotate-12 rounded-full bg-[#d96c3b]/55" />
-                                <div className="absolute bottom-[33%] left-[22%] h-1 w-28 -rotate-12 rounded-full bg-[#d96c3b]/55" />
+                                {showMapPointers &&
+                                    mapPointerState.map((pointer, pointerIndex) => (
+                                        <div key={pointer.label}>
+                                            <div
+                                                className="absolute z-10 rounded-md bg-white px-3 py-2 text-sm font-bold shadow-lg"
+                                                style={{
+                                                    top: `${pointer.labelY}%`,
+                                                    left: `${pointer.labelX}%`,
+                                                    transform:
+                                                        'translate(-50%, -50%)',
+                                                    cursor: editMapPointers
+                                                        ? 'grab'
+                                                        : 'default',
+                                                }}
+                                                onPointerDown={() => {
+                                                    if (!editMapPointers) {
+                                                        return;
+                                                    }
+
+                                                    dragStateRef.current = {
+                                                        index: pointerIndex,
+                                                        type: 'label',
+                                                    };
+                                                }}
+                                            >
+                                                {pointer.label}
+                                            </div>
+                                            {(() => {
+                                                const lineWidth = Math.hypot(
+                                                    pointer.topX -
+                                                        pointer.anchorX,
+                                                    pointer.topY -
+                                                        pointer.anchorY,
+                                                );
+                                                const lineAngle =
+                                                    (Math.atan2(
+                                                        pointer.topY -
+                                                            pointer.anchorY,
+                                                        pointer.topX -
+                                                            pointer.anchorX,
+                                                    ) *
+                                                        180) /
+                                                    Math.PI;
+
+                                                return (
+                                            <div
+                                                className="absolute z-20 h-[2px] origin-left rounded-full bg-[#d96c3b]"
+                                                style={{
+                                                    top: `${pointer.anchorY}%`,
+                                                    left: `${pointer.anchorX}%`,
+                                                    width: `${lineWidth}%`,
+                                                    transform: `rotate(${lineAngle}deg)`,
+                                                }}
+                                            />
+                                                );
+                                            })()}
+                                            {editMapPointers && (
+                                                <div
+                                                    className="absolute z-20 size-2.5 rounded-full bg-[#f4b860] ring-2 ring-[#17211b]"
+                                                    style={{
+                                                        top: `${pointer.topY}%`,
+                                                        left: `${pointer.topX}%`,
+                                                        transform:
+                                                            'translate(-50%, -50%)',
+                                                        cursor: 'grab',
+                                                    }}
+                                                    onPointerDown={() => {
+                                                        dragStateRef.current = {
+                                                            index: pointerIndex,
+                                                            type: 'top',
+                                                        };
+                                                    }}
+                                                />
+                                            )}
+                                            <div
+                                                className="absolute z-20 size-2 rounded-full bg-[#d96c3b]"
+                                                style={{
+                                                    top: `${pointer.anchorY}%`,
+                                                    left: `${pointer.anchorX}%`,
+                                                    transform:
+                                                        'translate(-50%, -50%)',
+                                                    cursor: editMapPointers
+                                                        ? 'grab'
+                                                        : 'default',
+                                                }}
+                                                onPointerDown={() => {
+                                                    if (!editMapPointers) {
+                                                        return;
+                                                    }
+
+                                                    dragStateRef.current = {
+                                                        index: pointerIndex,
+                                                        type: 'anchor',
+                                                    };
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
                             </div>
+                            {editMapPointers && (
+                                <div className="relative z-40 mt-4 rounded-md border border-white/20 bg-[#101714] p-3 text-[12px] leading-4 text-white shadow-xl pointer-events-auto">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="text-white/90">
+                                            Drag labels, orange dots, and gold
+                                            dots. Then copy this config:
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={copyMapPointerConfig}
+                                            className="rounded-md bg-[#f4b860] px-3 py-1.5 text-[11px] font-black text-[#17211b] uppercase"
+                                        >
+                                            {copyStatus === 'copied'
+                                                ? 'Copied'
+                                                : copyStatus === 'error'
+                                                  ? 'Copy failed'
+                                                  : 'Copy config'}
+                                        </button>
+                                    </div>
+                                    <textarea
+                                        readOnly
+                                        value={mapPointerConfig}
+                                        className="mt-3 h-44 w-full resize-none rounded-md border border-white/20 bg-[#0a0f0d] p-3 font-mono text-[11px] leading-5 text-[#d8f3dc]"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -257,7 +579,7 @@ export default function Welcome() {
                                         Date
                                     </p>
                                     <p className="mt-2 text-lg font-black">
-                                        To be confirmed
+                                        June 2, 2026
                                     </p>
                                 </div>
                                 <div className="rounded-md bg-white p-5 text-[#17211b]">
