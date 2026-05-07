@@ -10,6 +10,8 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+Route::inertia('/more-info', 'more-info')->name('more-info');
+
 Route::get('qr', function (Request $request) {
     QrScan::create([
         'user_agent' => $request->userAgent(),
