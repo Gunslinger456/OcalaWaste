@@ -4,8 +4,8 @@ import {
     ChevronRight,
     Clock3,
     FileText,
+    Mail,
     MapPin,
-    PhoneCall,
     Share2,
     ShieldAlert,
 } from 'lucide-react';
@@ -70,24 +70,24 @@ export default function Welcome() {
                                 churches, homes, farms, and local businesses. Public input before the vote is
                                 critical.
                             </p>
-                            <div className="mt-6 flex flex-wrap gap-3">
+                            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                 <a
                                     href="#meeting"
-                                    className="inline-flex items-center justify-center gap-2 rounded-md bg-[#f4b860] px-5 py-3 text-sm font-bold text-[#17211b] transition hover:bg-[#ffd27c]"
+                                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg border border-[#f4b860] bg-[#f4b860] px-5 py-3 text-center text-sm font-black text-[#17211b] shadow-[0_12px_28px_rgba(0,0,0,0.24)] transition hover:-translate-y-0.5 hover:bg-[#ffd27c] focus-visible:ring-4 focus-visible:ring-[#f4b860]/40 focus-visible:outline-none"
                                 >
                                     Show up at the meeting
                                     <ChevronRight className="size-4" />
                                 </a>
                                 <a
-                                    href="#commissioners"
-                                    className="inline-flex items-center justify-center gap-2 rounded-md border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+                                    href="https://www.marionfl.org/my-commissioners"
+                                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/[0.08] px-5 py-3 text-center text-sm font-black text-white shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/[0.14] focus-visible:ring-4 focus-visible:ring-white/20 focus-visible:outline-none"
                                 >
                                     Contact commissioners
-                                    <PhoneCall className="size-4" />
+                                    <Mail className="size-4" />
                                 </a>
                                 <a
                                     href="/more-info"
-                                    className="inline-flex items-center justify-center gap-2 rounded-md border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+                                    className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg border border-[#d96c3b]/80 bg-[#d96c3b]/18 px-5 py-3 text-center text-sm font-black text-[#ffd7c2] shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:border-[#f0844f] hover:bg-[#d96c3b]/28 hover:text-white focus-visible:ring-4 focus-visible:ring-[#d96c3b]/35 focus-visible:outline-none sm:col-span-2 xl:col-span-1"
                                 >
                                     More info
                                     <FileText className="size-4" />
