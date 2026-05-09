@@ -62,7 +62,13 @@ export default function Welcome() {
                                 <ShieldAlert className="size-4 text-[#f4b860]" />
                                 Protect Ocala Neighborhoods
                             </div>
-                            <h1 className="mt-5 text-4xl leading-tight font-black text-balance sm:text-5xl">
+                            <h1
+                                className="mt-5 text-4xl leading-tight font-extrabold text-balance sm:text-5xl"
+                                style={{
+                                    fontFamily:
+                                        'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                                }}
+                            >
                                 PROTECT OUR KIDS, NEIGHBORHOODS, CHURCHES AND BUSINESSES
                             </h1>
                             <p className="mt-4 max-w-3xl text-base leading-7 text-white/80 sm:text-lg">

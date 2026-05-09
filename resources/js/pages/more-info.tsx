@@ -121,7 +121,13 @@ export default function MoreInfo() {
                             <FileWarning className="size-4" />
                             Evidence to ask commissioners about
                         </div>
-                        <h1 className="mt-5 max-w-4xl text-4xl leading-tight font-black text-balance sm:text-5xl">
+                        <h1
+                            className="mt-5 max-w-4xl text-4xl leading-tight font-extrabold text-balance sm:text-5xl"
+                            style={{
+                                fontFamily:
+                                    'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                            }}
+                        >
                             The vote should not move forward without answers on
                             fire, odor, water, and location risk.
                         </h1>
