@@ -1,8 +1,9 @@
 ---
 deployment:
   tasks:
-    - export REPOPATH=/home/stinaaid/repositories/OcalaWaste
-    - export DEPLOYPATH=/home/stinaaid/public_html
+    - if [ -d /home/ocalntve ]; then export SITEHOME=/home/ocalntve; else export SITEHOME=/home/stinaaid; fi
+    - export REPOPATH=$SITEHOME/repositories/OcalaWaste
+    - export DEPLOYPATH=$SITEHOME/public_html
     - /bin/rm -rf $DEPLOYPATH/build
     - /bin/cp -a $REPOPATH/public/. $DEPLOYPATH/
     - /usr/bin/perl -pi -e "s#__DIR__\.'/../vendor/autoload.php'#__DIR__.'/../repositories/OcalaWaste/vendor/autoload.php'#g" $DEPLOYPATH/index.php
