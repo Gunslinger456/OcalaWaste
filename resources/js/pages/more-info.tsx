@@ -221,14 +221,6 @@ export default function MoreInfo() {
                         <h2 className="text-3xl font-black">
                             Violations and References
                         </h2>
-                        <div className="mt-4 rounded-lg border border-white/18 bg-white/[0.06] p-4">
-                            <p className="text-sm leading-6 text-white/84">
-                                Notice: This page shares residents&apos; opinions and concerns for public
-                                discussion. It does not claim undisputed facts about any person or company.
-                                For public comments, stick to documented sources, firsthand experiences, and
-                                policy concerns.
-                            </p>
-                        </div>
                         <div className="mt-5 grid gap-3 md:grid-cols-2">
                             {sources.map((source) => (
                                 <a
@@ -248,6 +240,16 @@ export default function MoreInfo() {
                                 </a>
                             ))}
                         </div>
+                    </div>
+                </section>
+                <section className="border-t border-[#17211b]/10 bg-[#efece4] px-6 py-6 lg:px-8">
+                    <div className="mx-auto w-full max-w-7xl rounded-lg border border-[#17211b]/15 bg-white p-4">
+                        <p className="text-sm leading-6 text-[#4a554d]">
+                            Notice: This page shares residents&apos; opinions and concerns for public
+                            discussion. It does not claim undisputed facts about any person or company. For
+                            public comments, stick to documented sources, firsthand experiences, and policy
+                            concerns.
+                        </p>
                     </div>
                 </section>
             </main>
