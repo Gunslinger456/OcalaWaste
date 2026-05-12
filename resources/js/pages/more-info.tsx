@@ -1,6 +1,5 @@
 import { Head } from '@inertiajs/react';
 import {
-    AlertTriangle,
     ChevronRight,
     ClipboardList,
     Droplets,
@@ -15,41 +14,57 @@ const concernCards = [
     {
         title: 'Fire risk near people, schools, and businesses',
         icon: Flame,
-        body: 'Compost, mulch, wood debris, and organic waste operations can create serious fire-response questions. Commissioners should require a full history of fires at comparable or related sites, whether each fire was accidental, what caused it, and what controls would prevent repeat events here.',
+        points: [
+            'Food waste, mulch, and wood debris sites can catch fire.',
+            'Nearby schools, homes, and businesses increase the risk.',
+            'Vote no until fire history and prevention plans are verified.',
+        ],
     },
     {
         title: 'Odor and fumes are not hypothetical',
         icon: Wind,
-        body: 'Odor complaints and noxious-fume allegations have followed similar waste-handling operations elsewhere. Before approval, the applicant should prove how odors will be monitored, reported, enforced, and stopped when nearby residents or businesses are affected.',
+        points: [
+            'This is not a closed facility. It is open-air.',
+            'Open-air processing can create strong, persistent odors.',
+            'Vote no until odor limits and enforcement are clear.',
+        ],
     },
     {
         title: 'Water and runoff concerns need hard limits',
         icon: Droplets,
-        body: 'EPA enforcement against Denali involved alleged sewage-sludge land-application violations and concerns about nitrogen moving into groundwater and surface water. Any approval should require site-specific sampling, stormwater controls, and enforceable operating limits.',
+        points: [
+            'Similar operations have raised runoff concerns.',
+            'Nearby water and soil need strict local protection.',
+            'Vote no until sampling and enforcement limits are set.',
+        ],
     },
     {
-        title: 'The location deserves a real alternatives review',
+        title: 'The location needs to be somewhere else',
         icon: MapPinned,
-        body: 'If other sites are available, including existing waste-handling infrastructure in the region, commissioners should ask why this location near schools, businesses, trucking activity, homes, and wooded areas is the right place to add this risk.',
+        points: [
+            'The site is near schools, homes, churches, farms, and businesses.',
+            'Safer locations should be reviewed in public first.',
+            'Vote no on this location.',
+        ],
+    },
+    {
+        title: 'Home sale and property value concerns',
+        icon: MapPinned,
+        points: [
+            'Persistent odors can affect buyer interest.',
+            'Residents are concerned homes may be harder to sell.',
+            'Residents are concerned property values may be harmed.',
+        ],
     },
 ];
 
 const commissionerQuestions = [
-    "How many fires have occurred at the applicant's facilities, affiliated facilities, or comparable compost, mulch, wood-debris, biosolids, or food-waste operations?",
-    'Were all of those fires accidental? What ignition sources were identified, and what changed afterward?',
-    'What fire-prevention plan will be required, including pile-size limits, temperature monitoring, water access, setbacks, emergency lanes, and fire department review?',
-    'How many people, homes, businesses, school facilities, wooded areas, and truck routes are within 300, 500, and 1,000 feet of the proposed operation?',
-    'What odor standard will be enforceable, who will inspect complaints, and what happens if odors leave the property?',
-    'Why should this site be approved if other regional options exist for handling this material?',
-    'What Florida DEP consent orders, complaints, enforcement actions, or settlements involve the applicant, operators, owners, or related entities?',
-];
-
-const recordRequests = [
-    'Florida DEP consent order 49648',
-    'Florida DEP consent order 104765, reportedly from February 2026',
-    'Florida DEP matter 19-0084',
-    'Fire incident reports for the applicant, affiliated facilities, and comparable operations',
-    'A measured map showing schools, homes, businesses, trucking operations, wooded areas, and evacuation constraints near the proposed site',
+    'I oppose this because fire risk at similar operations can put nearby homes, schools, and businesses in danger.',
+    'I oppose this because this is an open-air operation, and strong odors can affect surrounding neighborhoods.',
+    'I oppose this because this site is too close to homes, schools, churches, farms, and local businesses.',
+    'I oppose this because there are other Florida facilities better suited for this type of operation.',
+    'I oppose this because added heavy truck traffic will burden nearby roads and neighborhoods.',
+    'I oppose this because unresolved DEP enforcement concerns should be addressed before any approval.',
 ];
 
 const sources = [
@@ -119,7 +134,7 @@ export default function MoreInfo() {
                     <div className="mx-auto w-full max-w-7xl">
                         <div className="inline-flex items-center gap-2 rounded-md border border-[#f4b860]/35 bg-[#f4b860]/12 px-3 py-1.5 text-sm font-black text-[#ffd27c]">
                             <FileWarning className="size-4" />
-                            Evidence to ask commissioners about
+                            Evidence to speak out upon
                         </div>
                         <h1
                             className="mt-5 max-w-4xl text-4xl leading-tight font-extrabold text-balance sm:text-5xl"
@@ -128,16 +143,14 @@ export default function MoreInfo() {
                                     'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                             }}
                         >
-                            The vote should not move forward without answers on
-                            fire, odor, water, and location risk.
+                            Commissioners should vote no on this proposal.
                         </h1>
                         <p className="mt-4 max-w-3xl text-base leading-7 text-white/78 sm:text-lg">
-                            These points organize the concerns residents can
-                            raise before any special use permit is approved. The
-                            key request is simple: require facts, records, and
-                            enforceable safeguards before placing this operation
-                            near people, schools, businesses, trucking activity,
-                            and wooded areas.
+                            This project brings major concerns: fire risk, odor,
+                            pests, water impacts, and heavy truck traffic near
+                            neighborhoods. The owner has numerous other
+                            facilities in Florida that are better suited for
+                            operations like this.
                         </p>
                     </div>
                 </section>
@@ -156,9 +169,14 @@ export default function MoreInfo() {
                                     <h2 className="mt-4 text-xl font-black">
                                         {concern.title}
                                     </h2>
-                                    <p className="mt-3 text-sm leading-6 text-[#4a554d]">
-                                        {concern.body}
-                                    </p>
+                                    <ul className="mt-3 grid gap-2 text-sm leading-6 text-[#4a554d]">
+                                        {concern.points.map((point) => (
+                                            <li key={point} className="flex gap-2">
+                                                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#d96c3b]" />
+                                                <span>{point}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </article>
                             );
                         })}
@@ -170,23 +188,26 @@ export default function MoreInfo() {
                         <div>
                             <div className="inline-flex items-center gap-2 rounded-md bg-[#d96c3b]/10 px-3 py-1.5 text-sm font-black text-[#a64824]">
                                 <ClipboardList className="size-4" />
-                                Questions for the record
+                                Public comment guide
                             </div>
                             <h2 className="mt-4 text-3xl font-black">
-                                Talking points for public comment
+                                2-minute talking points
                             </h2>
                             <p className="mt-3 text-sm leading-6 text-[#4a554d]">
-                                Use these as direct questions. If the applicant
-                                cannot answer them with documents, commissioners
-                                should not treat the risks as resolved.
+                                Public comment is not a debate. Each speaker gets
+                                about 2 minutes to state opposition. Use one or
+                                two points below as short statements.
                             </p>
                         </div>
-                        <ol className="grid gap-3">
-                            {commissionerQuestions.map((question) => (
+                        <ol className="grid gap-3 sm:grid-cols-2">
+                            {commissionerQuestions.map((question, index) => (
                                 <li
                                     key={question}
-                                    className="rounded-lg border border-[#17211b]/10 bg-[#f7f4ed] p-4 text-sm leading-6 font-semibold"
+                                    className="rounded-lg border border-[#17211b]/10 bg-[#f7f4ed] p-4 text-sm leading-6"
                                 >
+                                    <p className="mb-2 text-xs font-black tracking-wide text-[#a64824] uppercase">
+                                        Point {index + 1}
+                                    </p>
                                     {question}
                                 </li>
                             ))}
@@ -194,48 +215,20 @@ export default function MoreInfo() {
                     </div>
                 </section>
 
-                <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-8 lg:grid-cols-2 lg:px-8">
-                    <div className="rounded-lg border border-[#17211b]/10 bg-white p-5 shadow-sm">
-                        <div className="inline-flex items-center gap-2 rounded-md bg-[#17211b]/8 px-3 py-1.5 text-sm font-black text-[#17211b]">
-                            <AlertTriangle className="size-4 text-[#d96c3b]" />
-                            Records still needed
-                        </div>
-                        <h2 className="mt-4 text-2xl font-black">
-                            Documents to obtain before the hearing
-                        </h2>
-                        <ul className="mt-4 grid gap-3">
-                            {recordRequests.map((request) => (
-                                <li
-                                    key={request}
-                                    className="flex gap-3 text-sm leading-6 text-[#4a554d]"
-                                >
-                                    <span className="mt-2 size-2 shrink-0 rounded-full bg-[#d96c3b]" />
-                                    <span>{request}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="rounded-lg border border-[#17211b]/10 bg-white p-5 shadow-sm">
-                        <h2 className="text-2xl font-black">Bottom line</h2>
-                        <p className="mt-4 text-sm leading-6 text-[#4a554d]">
-                            Commissioners should require a complete risk record:
-                            fire history, emergency-response capacity, odor
-                            controls, water protections, enforcement history,
-                            and a real explanation for why this site is
-                            preferable to less sensitive locations. Without that
-                            record, approval shifts uncertainty onto nearby
-                            residents, students, businesses, and first
-                            responders.
-                        </p>
-                    </div>
-                </section>
-
+            
                 <section className="bg-[#17211b] px-6 py-8 text-white lg:px-8">
                     <div className="mx-auto w-full max-w-7xl">
                         <h2 className="text-3xl font-black">
-                            Sources and reference links
+                            Violations and References
                         </h2>
+                        <div className="mt-4 rounded-lg border border-white/18 bg-white/[0.06] p-4">
+                            <p className="text-sm leading-6 text-white/84">
+                                Notice: This page shares residents&apos; opinions and concerns for public
+                                discussion. It does not claim undisputed facts about any person or company.
+                                For public comments, stick to documented sources, firsthand experiences, and
+                                policy concerns.
+                            </p>
+                        </div>
                         <div className="mt-5 grid gap-3 md:grid-cols-2">
                             {sources.map((source) => (
                                 <a
